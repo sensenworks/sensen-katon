@@ -1,0 +1,28 @@
+{
+  "name": "sensen-katon",
+  "version": "0.0.11",
+  "description": "Preview of Sensen Katon Framework",
+  "main": "index.js",
+  "type": "module",
+  "types": "sensen-katon.d.ts",
+  "scripts": {
+    "debug": "tsc --watch",
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "types:build": "npm-dts generate -o sensen-katon.d.ts -f -c"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^18.7.13",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.8.2",
+    "vite": "3.2.3"
+  },
+  "dependencies": {
+    "sensen-metric-random": "^0.0.1",
+    "sensen-visualkit": "^0.0.8"
+  }
+}
