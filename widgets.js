@@ -1,5 +1,5 @@
 import { AbstractWidget, ActionWidget, AttributionWidget, PhysicalWidget, ReferenceWidget, } from "./foundation";
-import { HeadlingBigWidget, HeadlingBiggerWidget, HeadlingMediumWidget, HeadlingSmallWidget, HeadlingSmallerWidget, LiWidget, ParagraphWidget, StrongTextWidget, StyleWidget, TextualWidget, UListWidget, VisualKitWidget, FormWidget, InputWidget, DropdownOptionWidget, DropdownListWidget, ButtonWidget, DropdownOptionGroupWidget, TableWidget, } from "./foundation-html";
+import { HeadlingBigWidget, HeadlingBiggerWidget, HeadlingMediumWidget, HeadlingSmallWidget, HeadlingSmallerWidget, LiWidget, ParagraphWidget, StrongTextWidget, StyleWidget, TextualWidget, UListWidget, VisualKitWidget, FormWidget, InputWidget, DropdownOptionWidget, DropdownListWidget, ButtonWidget, DropdownOptionGroupWidget, TableWidget, PictureWidget, } from "./foundation-html";
 import KatonState from "./state";
 import MetricRandom from "sensen-metric-random/index";
 export function Context(callback) {
@@ -98,6 +98,9 @@ export function Li(...widgets) {
 }
 export function StrongText(...widgets) {
     return (new StrongTextWidget(widgets)).prepare();
+}
+export function Picture(props) {
+    return (new PictureWidget(props)).prepare();
 }
 export function Form(...widgets) {
     return (new FormWidget(widgets)).prepare();

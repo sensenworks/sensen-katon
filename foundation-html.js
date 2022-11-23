@@ -9,7 +9,7 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _StyleWidget_dom;
+var _StyleWidget_dom, _PictureWidget_instances, _PictureWidget_pendingElement, _PictureWidget_failedElement, _PictureWidget_loaded, _PictureWidget_unloaded;
 import { AbstractWidget, PhysicalWidget } from "./foundation";
 import KatonProps from "./props";
 import { defineElement } from "./elements";
@@ -17,8 +17,9 @@ import { KatonElementHeadlingBig, KatonElementHeadlingBigger, KatonElementHeadli
 import { VisualKitStyle } from "sensen-visualkit";
 import MetricRandom from "sensen-metric-random";
 import useVisualKit from "sensen-visualkit/index";
-import Attribution, { AttributesObject } from "./attribution";
+import KatonAttribution, { AttributesObject } from "./attribution";
 import { ExtendedDropdownListOption, ExtendedDropdownListOptions } from "./extended";
+import { FragmentedBuilder } from "./builder";
 export class HeadlingWidget extends PhysicalWidget {
     constructor(children) {
         super(children);
@@ -310,7 +311,7 @@ export class StyleWidget extends AbstractWidget {
             const computed = VisualKitStyle.parse(declarations || {}).join('');
             __classPrivateFieldGet(this, _StyleWidget_dom, "f").append(`[kat\\:kit~="${this.selector}"] { ${computed} }`);
             this.parent.element?.prepend(__classPrivateFieldGet(this, _StyleWidget_dom, "f"));
-            this.attribution = (new Attribution(this.parent.element))
+            this.attribution = (new KatonAttribution(this.parent.element))
                 .sync('kat:kit')
                 .add(this.selector)
                 .link();
@@ -501,6 +502,101 @@ export class TableWidget extends PhysicalWidget {
         return `${data}`;
     }
 }
+export class PictureWidget extends PhysicalWidget {
+    constructor(props) {
+        super([]);
+        _PictureWidget_instances.add(this);
+        this.name = 'picture';
+        this.props = undefined;
+        this.element = null;
+        _PictureWidget_pendingElement.set(this, null);
+        _PictureWidget_failedElement.set(this, null);
+        this.source = null;
+        this.sources = [];
+        this.props = new KatonProps(props);
+    }
+    prepare() {
+        super.prepare();
+        __classPrivateFieldSet(this, _PictureWidget_pendingElement, document.createElement('div'), "f");
+        __classPrivateFieldSet(this, _PictureWidget_failedElement, document.createElement('div'), "f");
+        this.source = document.createElement('img');
+        this.source.style.display = 'none';
+        this.sources = [];
+        this.append(__classPrivateFieldGet(this, _PictureWidget_pendingElement, "f"), __classPrivateFieldGet(this, _PictureWidget_failedElement, "f"), this.source);
+        return this;
+    }
+    pending() {
+        if (this.props?.data.pending) {
+            if (this.builder) {
+                if (this.props.data.pending instanceof PhysicalWidget) {
+                    FragmentedBuilder(this.builder, this.props.data.pending, this);
+                    if (this.props.data.pending.element) {
+                        __classPrivateFieldGet(this, _PictureWidget_pendingElement, "f")?.append(this.props.data.pending.element);
+                    }
+                }
+                else if (typeof this.props.data.pending && __classPrivateFieldGet(this, _PictureWidget_pendingElement, "f")) {
+                    __classPrivateFieldGet(this, _PictureWidget_pendingElement, "f").innerHTML = `${this.props.data.pending}`;
+                }
+            }
+        }
+        return this;
+    }
+    sourceListener(element) {
+        element?.addEventListener('load', () => __classPrivateFieldGet(this, _PictureWidget_instances, "m", _PictureWidget_loaded).call(this));
+        element?.addEventListener('error', () => __classPrivateFieldGet(this, _PictureWidget_instances, "m", _PictureWidget_unloaded).call(this));
+        return this;
+    }
+    medias() {
+        if (this.props?.data.media) {
+            this.props.data.media.map(({ query, source }) => {
+                const element = document.createElement('source');
+                this.sourceListener(element);
+                element.setAttribute('media', `(${query})`);
+                element.setAttribute('srcset', `${source}`);
+                this.sources?.push(element);
+                this.element?.prepend(element);
+            });
+        }
+        return this;
+    }
+    render() {
+        super.render();
+        this.pending()
+            .medias()
+            .sourceListener(this.source)
+            .source?.setAttribute('src', `${this.props?.data.source}`);
+        return this;
+    }
+}
+_PictureWidget_pendingElement = new WeakMap(), _PictureWidget_failedElement = new WeakMap(), _PictureWidget_instances = new WeakSet(), _PictureWidget_loaded = function _PictureWidget_loaded() {
+    __classPrivateFieldGet(this, _PictureWidget_failedElement, "f")?.remove();
+    __classPrivateFieldGet(this, _PictureWidget_pendingElement, "f")?.remove();
+    this.emitter.dispatch('load', this);
+    if (this.source) {
+        this.source.style.removeProperty('display');
+    }
+    return this;
+}, _PictureWidget_unloaded = function _PictureWidget_unloaded() {
+    __classPrivateFieldGet(this, _PictureWidget_pendingElement, "f")?.remove();
+    if (this.source) {
+        this.source.style.display = 'none';
+    }
+    if (this.props?.data.failed) {
+        if (this.builder) {
+            if (this.props.data.failed instanceof PhysicalWidget) {
+                FragmentedBuilder(this.builder, this.props.data.failed, this);
+                if (this.props.data.failed.element) {
+                    __classPrivateFieldGet(this, _PictureWidget_failedElement, "f")?.append(this.props.data.failed.element);
+                }
+            }
+            else if (typeof this.props.data.failed && __classPrivateFieldGet(this, _PictureWidget_failedElement, "f")) {
+                __classPrivateFieldGet(this, _PictureWidget_failedElement, "f").innerHTML = `${this.props.data.failed}`;
+            }
+        }
+    }
+    this.emitter.dispatch('error', this);
+    return this;
+};
 defineElement('kt-h1', KatonElementHeadlingBigger);
 defineElement('kt-h2', KatonElementHeadlingBig);
 defineElement('kt-h3', KatonElementHeadlingMedium);

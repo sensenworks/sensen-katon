@@ -234,6 +234,16 @@ declare module 'sensen-katon/declarations' {
       link(): this;
       unlink(property?: string | string[]): this;
   }
+  export type IPictureMedia = {
+      query: string;
+      source: string;
+  };
+  export type IPictureProps = {
+      source: string;
+      media?: Array<IPictureMedia>;
+      pending?: IPhysicalWidget | string;
+      failed?: IPhysicalWidget | string;
+  };
   export type IInputProps = IAttributesObject & {
       rows?: boolean | number;
       placeholder?: string;
@@ -416,7 +426,7 @@ declare module 'sensen-katon/extended' {
 declare module 'sensen-katon/foundation-html' {
   import { AbstractWidget, PhysicalWidget } from "sensen-katon/foundation";
   import KatonProps from "sensen-katon/props";
-  import type { IAbstractWidget, IStyleDeclaration, IHeadlingWidget, IPhysicalWidget, IWidgetChildren, IAttribution, IInputProps, IDropdownListProps, IDropdownListOption, IDropdownListOptionGroup, IDropdownListOptionExtended, ITableProps, ITableSectionWidget, ITableRowWidget, ITableCellWidget, ITableFragmentWidget } from "sensen-katon/declarations";
+  import type { IAbstractWidget, IStyleDeclaration, IHeadlingWidget, IPhysicalWidget, IWidgetChildren, IAttribution, IInputProps, IDropdownListProps, IDropdownListOption, IDropdownListOptionGroup, IDropdownListOptionExtended, ITableProps, ITableSectionWidget, ITableRowWidget, ITableCellWidget, ITableFragmentWidget, IPictureProps } from "sensen-katon/declarations";
   export class HeadlingWidget extends PhysicalWidget implements IHeadlingWidget {
       name?: string;
       children: IWidgetChildren[];
@@ -575,6 +585,20 @@ declare module 'sensen-katon/foundation-html' {
       parseRows(): this;
       parseFoot(): this;
       parseCellValue(data: any): string | PhysicalWidget;
+  }
+  export class PictureWidget extends PhysicalWidget implements IPhysicalWidget {
+      #private;
+      name?: string | undefined;
+      props?: KatonProps<IPictureProps> | undefined;
+      element: HTMLPictureElement | null;
+      source?: HTMLImageElement | null;
+      sources?: Array<HTMLSourceElement>;
+      constructor(props: IPictureProps);
+      prepare(): this;
+      pending(): this;
+      sourceListener(element: HTMLElement | null | undefined): this;
+      medias(): this;
+      render(): this;
   }
 
 }
@@ -759,8 +783,8 @@ declare module 'sensen-katon/utils/class' {
 }
 declare module 'sensen-katon/widgets' {
   import { AbstractWidget, ActionWidget, AttributionWidget, PhysicalWidget, ReferenceWidget } from "sensen-katon/foundation";
-  import type { IStyleDeclaration, IActionCallback, IWidgetChildren, IWidgetNode, IKatonContextCallback, IKatonReferenceCallback, IState, IInputProps, IDropdownListProps, IDropdownListOption, IAttributionProps, ITableProps } from "sensen-katon/declarations";
-  import { HeadlingBigWidget, HeadlingBiggerWidget, HeadlingMediumWidget, HeadlingSmallWidget, HeadlingSmallerWidget, LiWidget, ParagraphWidget, StrongTextWidget, StyleWidget, TextualWidget, UListWidget, VisualKitWidget, FormWidget, InputWidget, DropdownOptionWidget, DropdownListWidget, ButtonWidget, DropdownOptionGroupWidget, TableWidget } from "sensen-katon/foundation-html";
+  import type { IStyleDeclaration, IActionCallback, IWidgetChildren, IWidgetNode, IKatonContextCallback, IKatonReferenceCallback, IState, IInputProps, IDropdownListProps, IDropdownListOption, IAttributionProps, ITableProps, IPictureProps } from "sensen-katon/declarations";
+  import { HeadlingBigWidget, HeadlingBiggerWidget, HeadlingMediumWidget, HeadlingSmallWidget, HeadlingSmallerWidget, LiWidget, ParagraphWidget, StrongTextWidget, StyleWidget, TextualWidget, UListWidget, VisualKitWidget, FormWidget, InputWidget, DropdownOptionWidget, DropdownListWidget, ButtonWidget, DropdownOptionGroupWidget, TableWidget, PictureWidget } from "sensen-katon/foundation-html";
   import KatonState from "sensen-katon/state";
   export function Context(callback: IKatonContextCallback): AbstractWidget;
   export function Ref(ref: IKatonReferenceCallback): ReferenceWidget;
@@ -785,6 +809,7 @@ declare module 'sensen-katon/widgets' {
   export function UL(...widgets: IWidgetChildren[]): UListWidget;
   export function Li(...widgets: IWidgetChildren[]): LiWidget;
   export function StrongText(...widgets: IWidgetChildren[]): StrongTextWidget;
+  export function Picture(props: IPictureProps): PictureWidget;
   export function Form(...widgets: IWidgetChildren[]): FormWidget;
   export function Input(props: IInputProps): InputWidget;
   export function DropdownList(props: IDropdownListProps): DropdownListWidget;

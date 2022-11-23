@@ -19,7 +19,8 @@ import {
   Form,
   Attribution,
   UseAction,
-  Table
+  Table,
+  Picture
 } from "./widgets"
 import Ui from "./ui"
 import { 
@@ -214,6 +215,18 @@ const main = ()=>{
         ':submit' : 'message'
       }),
        
+      Picture({
+        source: './donut.png',
+        media:[
+          {
+            query: 'min-width:960px',
+            source: './donut-2.png',
+          }
+        ],
+        failed: Textual('Image Failed'),
+        pending: Textual('Pending...'),
+        // pending:'Image en cours de chargement...',
+      }),
 
       Table({
         

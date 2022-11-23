@@ -21,7 +21,8 @@ import type {
   ITableFragmentWidget,
   ITableRows,
   IAttributionProps,
-  ITableColumns
+  ITableColumns,
+  IPictureProps
 } from "./declarations";
 import { defineElement } from "./elements";
 import { 
@@ -34,11 +35,13 @@ import {
 import { VisualKitStyle } from "sensen-visualkit";
 import MetricRandom from "sensen-metric-random";
 import useVisualKit from "sensen-visualkit/index";
-import Attribution, { AttributesObject } from "./attribution";
+import KatonAttribution, { AttributesObject } from "./attribution";
 import { 
   ExtendedDropdownListOption, 
   ExtendedDropdownListOptions 
 } from "./extended";
+import { FragmentedBuilder } from "./builder";
+
 
 
 
@@ -573,7 +576,7 @@ export class StyleWidget extends AbstractWidget implements IAbstractWidget{
 
       this.parent.element?.prepend( this.#dom );
 
-      this.attribution = (new Attribution( this.parent.element ))
+      this.attribution = (new KatonAttribution( this.parent.element ))
         
         .sync('kat:kit')
 
@@ -973,6 +976,198 @@ export class TableWidget extends PhysicalWidget implements IPhysicalWidget{
 }
 
 
+
+
+
+export class PictureWidget extends PhysicalWidget implements IPhysicalWidget{
+
+  name?: string | undefined = 'picture';
+
+  props?: KatonProps<IPictureProps> | undefined = undefined
+
+  element: HTMLPictureElement | null = null;
+  
+  #pendingElement ?: HTMLElement | null = null;
+
+  #failedElement ?: HTMLElement | null = null;
+
+  source ?: HTMLImageElement | null = null;
+
+  sources ?: Array<HTMLSourceElement> = []
+  
+  constructor( props : IPictureProps ){
+
+    super([])
+
+    this.props = new KatonProps( props )
+    
+  }
+
+
+  prepare(): this {
+
+    super.prepare();
+
+    this.#pendingElement = document.createElement('div');
+
+    this.#failedElement = document.createElement('div');
+
+    this.source = document.createElement('img');
+
+    this.source.style.display = 'none'
+
+    this.sources = []
+      
+    this.append( this.#pendingElement, this.#failedElement, this.source, )
+
+    return this;
+    
+  }
+  
+
+  pending(){
+
+    if( this.props?.data.pending ){
+
+      if( this.builder ){
+
+        if( this.props.data.pending instanceof PhysicalWidget  ){
+
+          FragmentedBuilder( this.builder, this.props.data.pending, this )
+
+          if( this.props.data.pending.element ){
+            
+            this.#pendingElement?.append( this.props.data.pending.element )
+
+          }
+
+        }
+
+        else if( typeof this.props.data.pending && this.#pendingElement ){
+
+          this.#pendingElement.innerHTML = `${ this.props.data.pending }`
+          
+        }
+
+      }
+      
+
+    }
+
+    return this;
+    
+  }
+
+
+  #loaded(){
+
+    this.#failedElement?.remove()
+
+    this.#pendingElement?.remove()
+
+    this.emitter.dispatch('load', this )
+
+    if( this.source ){ this.source.style.removeProperty('display') }
+    
+    return this;
+    
+  }
+  
+  #unloaded(){
+
+    this.#pendingElement?.remove()
+    
+    if( this.source ){ this.source.style.display = 'none' }
+
+    if( this.props?.data.failed ){
+
+      if( this.builder ){
+
+        if( this.props.data.failed instanceof PhysicalWidget  ){
+
+          FragmentedBuilder( this.builder, this.props.data.failed, this )
+
+          if( this.props.data.failed.element ){
+            
+            this.#failedElement?.append( this.props.data.failed.element )
+
+          }
+
+        }
+
+        else if( typeof this.props.data.failed && this.#failedElement ){
+
+          this.#failedElement.innerHTML = `${ this.props.data.failed }`
+          
+        }
+
+      }
+      
+    }
+
+    this.emitter.dispatch('error', this )
+
+    return this;
+    
+  }
+
+
+  
+  sourceListener( element : HTMLElement | null | undefined ){
+
+    element?.addEventListener('load', ()=> this.#loaded())
+
+    element?.addEventListener('error', ()=> this.#unloaded())
+
+    return this;
+    
+  }
+  
+
+  medias(){
+
+    if( this.props?.data.media ){
+
+      this.props.data.media.map( ({ query, source }) =>{
+
+        const element = document.createElement('source')
+
+        this.sourceListener( element )
+
+        element.setAttribute('media', `(${ query })`)
+
+        element.setAttribute('srcset', `${ source }`)
+
+        this.sources?.push( element )
+    
+        this.element?.prepend( element )
+        
+      })
+      
+    }
+    
+    return this;
+    
+  }
+  
+  
+  render(): this {
+
+    super.render()
+
+    this.pending()
+
+    .medias()
+    
+    .sourceListener( this.source )
+
+    .source?.setAttribute('src', `${ this.props?.data.source }`)
+    
+    return this;
+    
+  }
+  
+}
 
 
 defineElement('kt-h1', KatonElementHeadlingBigger )

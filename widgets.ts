@@ -20,6 +20,7 @@ import type {
   IDropdownListOption,
   IAttributionProps,
   ITableProps,
+  IPictureProps,
 } from "./declarations";
 
 import { 
@@ -42,6 +43,7 @@ import {
   ButtonWidget,
   DropdownOptionGroupWidget,
   TableWidget,
+  PictureWidget,
 } from "./foundation-html";
 import KatonState from "./state";
 import MetricRandom from "sensen-metric-random/index";
@@ -244,6 +246,12 @@ export function Li( ...widgets : IWidgetChildren[] ){
 export function StrongText( ...widgets : IWidgetChildren[] ){
 
   return (new StrongTextWidget( widgets )).prepare()
+  
+}
+
+export function Picture( props : IPictureProps ){
+
+  return (new PictureWidget( props )).prepare()
   
 }
 

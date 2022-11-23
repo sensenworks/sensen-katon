@@ -1,5 +1,5 @@
 import Builder, { Append } from "./builder";
-import { Widget, H1, Paragraph, Textual, Context, H2, Ref, Style, Action, UseKit, State, Row, Button, Column, Input, DropdownList, Form, Attribution, UseAction, Table } from "./widgets";
+import { Widget, H1, Paragraph, Textual, Context, H2, Ref, Style, Action, UseKit, State, Row, Button, Column, Input, DropdownList, Form, Attribution, UseAction, Table, Picture } from "./widgets";
 import Ui from "./ui";
 const paragraph = () => {
     let ref = null;
@@ -78,6 +78,16 @@ const main = () => {
         border: '0 solid'
     }))).attribution({
         ':submit': 'message'
+    }), Picture({
+        source: './donut.png',
+        media: [
+            {
+                query: 'min-width:960px',
+                source: './donut-2.png',
+            }
+        ],
+        failed: Textual('Image Failed'),
+        pending: Textual('Pending...'),
     }), Table({
         column: [
             [

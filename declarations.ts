@@ -418,6 +418,21 @@ export interface IAttribution{
 
 
 
+
+export type IPictureMedia = {
+  query: string;
+  source: string;
+}
+
+export type IPictureProps = {
+  source: string;
+  media?: Array<IPictureMedia>;
+  pending ?: IPhysicalWidget | string;
+  failed ?: IPhysicalWidget | string;
+}
+
+
+
 export type IInputProps = IAttributesObject & {
 
   rows ?: boolean | number;
