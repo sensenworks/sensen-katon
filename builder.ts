@@ -334,9 +334,15 @@ export function PhysicalWidgetBuilder(
                   
                 }
                 
+                else if( child instanceof PhysicalWidget ){
+
+                  FragmentedBuilder( builder, child, widget )
+      
+                }
+
                 else{
 
-                  console.error( child ); throw (`Unknown Child instance`)
+                  console.error( child ); throw (`Unknown Child instance!`);
                   
                 }
 

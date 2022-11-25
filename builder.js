@@ -130,9 +130,12 @@ export function PhysicalWidgetBuilder(builder, widget, parent) {
                                 else if (child instanceof KatonContext) {
                                     child.render();
                                 }
+                                else if (child instanceof PhysicalWidget) {
+                                    FragmentedBuilder(builder, child, widget);
+                                }
                                 else {
                                     console.error(child);
-                                    throw (`Unknown Child instance`);
+                                    throw (`Unknown Child instance!`);
                                 }
                             }
                         }

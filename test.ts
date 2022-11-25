@@ -194,7 +194,9 @@ const main = ()=>{
               },
               { label:'choix 3', value:'3' },
               { label:'choix 4', value:'4' },
-            ])
+            ]).listen('change', (context) =>{
+              console.log('Choise changed', context )
+            })
           ),
 
           Button(

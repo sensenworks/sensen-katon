@@ -166,7 +166,7 @@ export class DropdownListWidget extends PhysicalWidget {
     constructor(props) {
         super([]);
         this.name = 'select';
-        this.jumplist = ['options'];
+        this.jumplist = ['options', 'listen'];
         this.widgets = [];
         this.props = undefined;
         this.props = new KatonProps(props);
@@ -268,7 +268,7 @@ export class VisualKitWidget extends AbstractWidget {
         super(props);
         this.props = undefined;
         this.props = new KatonProps(props || {});
-        this.listener('render', () => {
+        this.whenemit('render', () => {
             this.builder?.emitter.listen('ready', () => {
                 this.make();
             });
@@ -541,9 +541,19 @@ export class PictureWidget extends PhysicalWidget {
         }
         return this;
     }
+    inheritShapeStyle(element) {
+        if (element) {
+            const properties = 'objectFit minWidth width maxWidth minHeight height maxHeight';
+            properties.split(' ').map(prop => element.style[prop] = 'inherit');
+        }
+        return this;
+    }
     sourceListener(element) {
-        element?.addEventListener('load', () => __classPrivateFieldGet(this, _PictureWidget_instances, "m", _PictureWidget_loaded).call(this));
-        element?.addEventListener('error', () => __classPrivateFieldGet(this, _PictureWidget_instances, "m", _PictureWidget_unloaded).call(this));
+        if (element) {
+            this.inheritShapeStyle(element);
+            element.addEventListener('load', () => __classPrivateFieldGet(this, _PictureWidget_instances, "m", _PictureWidget_loaded).call(this));
+            element.addEventListener('error', () => __classPrivateFieldGet(this, _PictureWidget_instances, "m", _PictureWidget_unloaded).call(this));
+        }
         return this;
     }
     medias() {

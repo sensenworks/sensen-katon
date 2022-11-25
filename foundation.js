@@ -35,8 +35,8 @@ export default class WidgetNode {
         this.emitter.dispatch('render', this);
         return this;
     }
-    listener(name, callback) {
-        this.emitter.listen(name, callback);
+    whenemit(listen, callback) {
+        this.emitter.listen(listen, callback);
         return this;
     }
 }
@@ -70,6 +70,17 @@ export class PhysicalWidget extends WidgetNode {
             this.parent.element.append(this.element);
             this.emitter.dispatch('connect', this);
         }
+        return this;
+    }
+    listen(eventname, callback) {
+        this.element?.addEventListener(eventname, (event) => {
+            callback({
+                widget: this,
+                event,
+                builder: this.builder
+            });
+            this.emitter.dispatch(`on${eventname}`, this);
+        });
         return this;
     }
     disconnect() {

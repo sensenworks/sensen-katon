@@ -73,7 +73,7 @@ declare module 'sensen-katon/declarations' {
       builder: IKatonBuilder<IWidgetNode> | null;
       render(): this;
       prepare(): this;
-      listener<T>(name: string, callback: KatonEmitterCallback<T>): this;
+      whenemit<T>(listen: string, callback: KatonEmitterCallback<T>): this;
       beforePrepare(): this;
       afterPrepare(): this;
   }
@@ -115,6 +115,16 @@ declare module 'sensen-katon/declarations' {
       injector(widget: C): this;
       render(): this;
   }
+  export type IWidgetListenerMap = GlobalEventHandlersEventMap;
+  export type IWidgetListenerCallback = (listenerContext: WidgetListenerContext) => void;
+  export type IWidgetListenerCallbacks = {
+      [k in keyof IWidgetListenerMap]?: IWidgetListenerCallback;
+  };
+  export type WidgetListenerContext = {
+      event: Event;
+      builder: IKatonBuilder<IWidgetNode> | null;
+      widget: IPhysicalWidget;
+  };
   export interface IKatonPropsInstance<T extends IKatonProps> {
       emitter: KatonEmitter;
       get data(): T;
@@ -160,7 +170,7 @@ declare module 'sensen-katon/declarations' {
   export interface IAttributionProps extends IAttributesObject {
       [A: string]: IAttributionProps | string | number | boolean | null;
   }
-  export type IAttributesObjectValues = IAttributesObject | Array<any> | string | number | boolean | null;
+  export type IAttributesObjectValues = IAttributesObject | Array<any> | string | number | boolean | null | Function;
   export type IAttributesObject = {
       [A: string]: IAttributesObjectValues;
   };
@@ -596,6 +606,7 @@ declare module 'sensen-katon/foundation-html' {
       constructor(props: IPictureProps);
       prepare(): this;
       pending(): this;
+      inheritShapeStyle(element: HTMLElement | null | undefined): this;
       sourceListener(element: HTMLElement | null | undefined): this;
       medias(): this;
       render(): this;
@@ -606,7 +617,7 @@ declare module 'sensen-katon/foundation' {
   import { KatonBuilder } from "sensen-katon/builder";
   import { KatonEmitter, KatonEmitterCallback } from "sensen-katon/emitter";
   import KatonProps from "sensen-katon/props";
-  import type { IWidgetNode, IWidgetChildren, IKatonContext, IWidgetProps, IPhysicalWidget, IAbstractWidget, IKatonProps, IKatonReference, IStyleDeclaration, IAttributionProps, IActionProps, IState, IWidgetUsable } from "sensen-katon/declarations";
+  import type { IWidgetNode, IWidgetChildren, IKatonContext, IWidgetProps, IPhysicalWidget, IAbstractWidget, IKatonProps, IKatonReference, IStyleDeclaration, IAttributionProps, IActionProps, IState, IWidgetUsable, IWidgetListenerMap, IWidgetListenerCallback } from "sensen-katon/declarations";
   export default class WidgetNode<Props extends IKatonProps> implements IWidgetNode {
       codex: string | null;
       children?: any;
@@ -622,7 +633,7 @@ declare module 'sensen-katon/foundation' {
       afterPrepare(): this;
       prepare(): this;
       render(): this;
-      listener<T>(name: string, callback: KatonEmitterCallback<T>): this;
+      whenemit<T>(listen: string, callback: KatonEmitterCallback<T>): this;
   }
   export class PhysicalWidget extends WidgetNode<IKatonProps> implements IPhysicalWidget {
       #private;
@@ -634,6 +645,7 @@ declare module 'sensen-katon/foundation' {
       $element(): this;
       prepare(): this;
       connect(): this;
+      listen(eventname: keyof IWidgetListenerMap, callback: IWidgetListenerCallback): this;
       disconnect(): this;
       clean(): this;
       style(declarations: IStyleDeclaration): this;

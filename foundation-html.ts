@@ -272,7 +272,7 @@ export class DropdownListWidget extends PhysicalWidget
 
   name ?: string = 'select';
 
-  jumplist : Array<string> = ['options']
+  jumplist : Array<string> = ['options', 'listen']
   
   widgets ?: Array<DropdownOptionWidget> = [] 
   
@@ -299,7 +299,7 @@ export class DropdownListWidget extends PhysicalWidget
       this.options( this.props?.data.options )
 
     }
-    
+
     return this;
     
   }
@@ -486,7 +486,7 @@ export class VisualKitWidget extends AbstractWidget implements IAbstractWidget{
 
     this.props = new KatonProps( props || {} );
 
-    this.listener('render', ()=>{ 
+    this.whenemit('render', ()=>{ 
 
       this.builder?.emitter.listen('ready', ()=>{
 
@@ -1112,12 +1112,35 @@ export class PictureWidget extends PhysicalWidget implements IPhysicalWidget{
   }
 
 
+
+  inheritShapeStyle( element : HTMLElement | null | undefined ){
+
+    if( element ){
+
+      const properties = 'objectFit minWidth width maxWidth minHeight height maxHeight'
+
+      // @ts-ignore
+      properties.split(' ').map( prop => element.style[ prop ] = 'inherit')
+      
+
+    }
+
+    return this;
+    
+  }
+  
   
   sourceListener( element : HTMLElement | null | undefined ){
 
-    element?.addEventListener('load', ()=> this.#loaded())
+    if( element ){
 
-    element?.addEventListener('error', ()=> this.#unloaded())
+      this.inheritShapeStyle( element )
+
+      element.addEventListener('load', ()=> this.#loaded())
+
+      element.addEventListener('error', ()=> this.#unloaded())
+
+    }
 
     return this;
     

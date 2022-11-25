@@ -19,6 +19,8 @@ import type {
   IKatonBuilder,
   IState,
   IWidgetUsable,
+  IWidgetListenerMap,
+  IWidgetListenerCallback,
 } from "./declarations";
 import MetricRandom from "sensen-metric-random/index";
 
@@ -76,9 +78,9 @@ export default class WidgetNode<Props extends IKatonProps> implements IWidgetNod
     
   }
 
-  listener<T>( name : string, callback : KatonEmitterCallback<T>){
+  whenemit<T>( listen : string, callback : KatonEmitterCallback<T>){
 
-    this.emitter.listen( name, callback )
+    this.emitter.listen( listen, callback )
 
     return this;
     
@@ -149,6 +151,28 @@ export class PhysicalWidget extends WidgetNode<IKatonProps> implements IPhysical
     
     }
     
+    return this;
+    
+  }
+
+  listen( eventname : keyof IWidgetListenerMap, callback : IWidgetListenerCallback ){
+
+    this.element?.addEventListener( eventname, ( event ) => {
+    
+      callback({ 
+        
+        widget: this, 
+        
+        event, 
+        
+        builder : this.builder 
+      
+      })
+
+      this.emitter.dispatch(`on${eventname}`, this )
+
+    })
+
     return this;
     
   }

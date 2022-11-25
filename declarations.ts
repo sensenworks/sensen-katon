@@ -36,7 +36,7 @@ export interface IWidgetNode{
 
   prepare() : this;
 
-  listener<T>( name : string, callback : KatonEmitterCallback<T>) : this;
+  whenemit<T>( listen : string, callback : KatonEmitterCallback<T>) : this;
 
   beforePrepare() : this;
 
@@ -138,6 +138,25 @@ export interface IKatonBuilder<C extends IWidgetNode> {
 }
 
 
+export type IWidgetListenerMap = GlobalEventHandlersEventMap
+
+export type IWidgetListenerCallback = ( listenerContext : WidgetListenerContext ) => void
+
+export type IWidgetListenerCallbacks = {
+
+  [ k in keyof IWidgetListenerMap ] ?: IWidgetListenerCallback
+  
+}
+
+export type WidgetListenerContext = {
+
+  event : Event;
+
+  builder : IKatonBuilder<IWidgetNode> | null;
+
+  widget : IPhysicalWidget
+  
+}
 
 export interface IKatonPropsInstance<T extends IKatonProps>{
 
@@ -248,7 +267,7 @@ export interface IAttributionProps extends IAttributesObject{
   
 }
 
-export type IAttributesObjectValues = IAttributesObject | Array<any> | string  | number | boolean | null
+export type IAttributesObjectValues = IAttributesObject | Array<any> | string  | number | boolean | null | Function
 
 export type IAttributesObject = {
 
@@ -558,6 +577,7 @@ export type IDropdownListProps = IAttributesObject & {
   options?: Array<IDropdownListOption>;
 
 }
+
 
 export interface IDropdownListOptionExtended extends IPhysicalWidget{
 

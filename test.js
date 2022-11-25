@@ -68,7 +68,9 @@ const main = () => {
         },
         { label: 'choix 3', value: '3' },
         { label: 'choix 4', value: '4' },
-    ])), Button(Textual('Fake Button')).style({
+    ]).listen('change', (context) => {
+        console.log('Choise changed', context);
+    })), Button(Textual('Fake Button')).style({
         color: '#999',
         cursor: 'pointer',
         borderRadius: '.5rem',
