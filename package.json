@@ -1,6 +1,6 @@
 {
   "name": "sensen-katon",
-  "version": "0.0.22",
+  "version": "0.0.23",
   "description": "Preview of Sensen Katon Framework",
   "main": "index.js",
   "type": "module",

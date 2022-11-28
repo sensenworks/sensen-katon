@@ -176,7 +176,7 @@ export function VCenter( ...widgets : IWidgetChildren[] ){
 
   widgets.push( Style({ height:'100%', alignItems:'center', }) )
 
-  return Row.apply( null, widgets )
+  return Column.apply( null, widgets )
   
 }
 

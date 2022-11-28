@@ -63,7 +63,7 @@ export function HColumnCenter(...widgets) {
 }
 export function VCenter(...widgets) {
     widgets.push(Style({ height: '100%', alignItems: 'center', }));
-    return Row.apply(null, widgets);
+    return Column.apply(null, widgets);
 }
 export function VColumnCenter(...widgets) {
     widgets.push(Style({ height: '100%', alignItems: 'center', }));
