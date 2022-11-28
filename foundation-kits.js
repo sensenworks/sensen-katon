@@ -189,9 +189,7 @@ export class TabsWidget extends PhysicalWidget {
             return helmet;
         });
         this.helmetsWidget.append(...(this.helmets || []));
-        this.frames = this.props?.data.map((tab) => tab.children.style({
-            display: 'block'
-        }).attribution({
+        this.frames = this.props?.data.map((tab) => tab.children.style({}).attribution({
             tab: { frame: `` }
         })).map(frame => {
             if (this.builder) {
@@ -220,9 +218,14 @@ export class TabsWidget extends PhysicalWidget {
                     this.frames[index] &&
                     this.frames[index] instanceof PhysicalWidget) {
                     frame = this.frames[index];
-                    this.frames[index].style({
-                        display: activate ? 'block' : 'none'
-                    });
+                    if (!activate) {
+                        this.frames[index].style({
+                            display: 'none'
+                        });
+                    }
+                    else {
+                        this.frames[index].removeStyle(['display']);
+                    }
                 }
                 if (activate) {
                     this.index = index;
@@ -239,7 +242,6 @@ export class TabsWidget extends PhysicalWidget {
     next(loop) {
         const key = (this.index || 0) + 1;
         const limit = (this.props?.data || []).length - 1;
-        console.log('Next', key, limit);
         return this.switch(key >= limit ? (loop ? 0 : limit) : key);
     }
     previous(loop) {

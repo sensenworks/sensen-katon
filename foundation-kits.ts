@@ -430,7 +430,7 @@ export class TabsWidget extends PhysicalWidget implements IPhysicalWidget {
 
     this.frames = this.props?.data.map( (tab) => tab.children.style({
       
-      display: 'block'
+      // display: 'flex'
 
     } ).attribution({
 
@@ -504,11 +504,23 @@ export class TabsWidget extends PhysicalWidget implements IPhysicalWidget {
 
           frame = this.frames[ index ];
 
-          this.frames[ index ].style({
 
-            display: activate ? 'block' : 'none'
+          if( !activate ){
 
-          })
+            this.frames[ index ].style({
+
+              display: 'none'
+  
+            })
+            
+          }
+
+
+          else{
+
+            this.frames[ index ].removeStyle(['display'])
+            
+          }
           
         }
 
@@ -544,8 +556,6 @@ export class TabsWidget extends PhysicalWidget implements IPhysicalWidget {
     const key = (this.index || 0) + 1;
 
     const limit = (this.props?.data || []).length - 1;
-
-    console.log('Next', key, limit )
 
     return this.switch( key >= limit ? (loop ? 0 : limit) : key );
     
