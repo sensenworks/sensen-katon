@@ -58,7 +58,7 @@ declare module 'sensen-katon/context' {
 
 }
 declare module 'sensen-katon/declarations' {
-  import { KatonEmitter, KatonEmitterCallback } from "sensen-katon/emitter";
+  import { IKatonEmitter, KatonEmitter, KatonEmitterCallback } from "sensen-katon/emitter";
   export type IWidgetUsable = IWidgetNode | IPhysicalWidget | IAbstractWidget | IKatonBuilder<IWidgetNode> | IKatonContext;
   export interface IWidgetNode {
       codex: string | null;
@@ -83,6 +83,9 @@ declare module 'sensen-katon/declarations' {
       disconnect(): this;
       clean(): this;
       style(declarations: IStyleDeclaration): this;
+      removeStyle(declarations: Array<keyof IStyleDeclaration>): this;
+      offset(property?: keyof IPhysicalOffset): number | IPhysicalOffset | undefined;
+      measure(): DOMRect | undefined;
       addClass(tokens: string): this;
       remove(): this;
       getAttribution(attrib: IAttributionProps | string): string | null;
@@ -95,7 +98,23 @@ declare module 'sensen-katon/declarations' {
       content(data: IWidgetUsable): this;
       html(data: string | null): this;
       pushToRender(...children: IWidgetChildren[]): this;
+      append(...nodes: (string | Node | IPhysicalWidget)[]): this;
+      on(eventname: keyof IWidgetListenerMap, callback: IWidgetListenerCallback): this;
   }
+  export type IPhysicalOffsetMap = {
+      'height': 'offsetHeight';
+      'width': 'offsetWidth';
+      'top': 'offsetTop';
+      'left': 'offsetLeft';
+      'parent': 'offsetParent';
+  };
+  export type IPhysicalOffset = {
+      'height': number | undefined;
+      'width': number | undefined;
+      'top': number | undefined;
+      'left': number | undefined;
+      'parent': number | undefined;
+  };
   export interface IHeadlingWidget extends IPhysicalWidget {
   }
   export interface IAbstractWidget extends IWidgetNode {
@@ -115,12 +134,15 @@ declare module 'sensen-katon/declarations' {
       injector(widget: C): this;
       render(): this;
   }
+  export type IWidgetListenerConfig = {
+      loop?: boolean;
+  };
   export type IWidgetListenerMap = GlobalEventHandlersEventMap;
-  export type IWidgetListenerCallback = (listenerContext: WidgetListenerContext) => void;
+  export type IWidgetListenerCallback = (listenerContext: IWidgetListenerContext) => void;
   export type IWidgetListenerCallbacks = {
       [k in keyof IWidgetListenerMap]?: IWidgetListenerCallback;
   };
-  export type WidgetListenerContext = {
+  export type IWidgetListenerContext = {
       event: Event;
       builder: IKatonBuilder<IWidgetNode> | null;
       widget: IPhysicalWidget;
@@ -341,6 +363,60 @@ declare module 'sensen-katon/declarations' {
   }
   export interface ITableSectionWidget extends ITableFragmentWidget {
       element: HTMLTableSectionElement | null;
+  }
+  export interface IKitTabProps extends IKatonProps {
+      default?: boolean;
+      label: string | IPhysicalWidget;
+      icon?: string;
+      about?: string | IPhysicalWidget;
+      children: IPhysicalWidget;
+  }
+  export type IKitTabsProps = Array<IKitTabProps>;
+  export type IKitTabsSwitchEmitter = {
+      index: number;
+      helmet: IPhysicalWidget;
+      frame: IPhysicalWidget;
+  };
+  export type IKitScrollingControllerCallbackProps = {
+      indicator?: IPhysicalWidget;
+      container?: IPhysicalWidget;
+      area: IKitScrollingArea;
+  };
+  export interface IKitScrollingProps extends IKatonProps {
+      direction?: IWidgetKitDirection;
+      controller?: {
+          indicator?: IPhysicalWidget;
+          infinite?: boolean;
+          refreshing: (widgets: IKitScrollingControllerCallbackProps) => Promise<boolean>;
+      };
+      children: Array<IPhysicalWidget>;
+  }
+  export type IWidgetKitDirection = 'vertical' | 'horizontal';
+  export type IKitScrollingArea = 'end' | 'start';
+  export type IKitScrollingAreaEmitter = {
+      area: IKitScrollingArea;
+      level: number;
+  };
+  export type IKatonGestureDelta = {
+      x: number;
+      y: number;
+  };
+  export type IKatonGestureSwipeConfig = IWidgetListenerConfig & {};
+  export type IKatonGesturePayload<T extends IPhysicalWidget> = {
+      gesture: IKatonGesture<T>;
+      context: IWidgetListenerContext;
+      measue: DOMRect | undefined;
+      delta: IKatonGestureDelta;
+  };
+  export type IKatonGestureCallback<T extends IPhysicalWidget> = (payload: IKatonGesturePayload<T>) => void;
+  export interface IKatonGesture<T extends IPhysicalWidget> {
+      widget: T;
+      emitter: IKatonEmitter;
+  }
+  export interface IKatonGestureInspector {
+      start: boolean;
+      move: boolean;
+      stopImmediat: boolean;
   }
 
 }
@@ -613,11 +689,48 @@ declare module 'sensen-katon/foundation-html' {
   }
 
 }
+declare module 'sensen-katon/foundation-kits' {
+  import KatonProps from "sensen-katon/props";
+  import { IKitScrollingProps, IKitTabsProps, IPhysicalWidget } from "sensen-katon/declarations";
+  import { PhysicalWidget } from "sensen-katon/foundation";
+  export class ScrollingWidget extends PhysicalWidget implements IPhysicalWidget {
+      props?: KatonProps<IKitScrollingProps>;
+      container?: IPhysicalWidget;
+      indicator?: IPhysicalWidget;
+      readyToPull: boolean;
+      readyToStartPull: boolean;
+      readyToEndPull: boolean;
+      constructor(props: IKitScrollingProps);
+      prepare(): this;
+      render(): this;
+      checkPullToRefresh(level: number): this;
+      listeners(): this;
+      process(): this;
+  }
+  export class TabsWidget extends PhysicalWidget implements IPhysicalWidget {
+      props?: KatonProps<IKitTabsProps>;
+      helmetsWidget: IPhysicalWidget;
+      framesWidget: IPhysicalWidget;
+      helmets?: Array<IPhysicalWidget>;
+      frames?: Array<IPhysicalWidget>;
+      index?: number;
+      helmet?: IPhysicalWidget;
+      frame?: IPhysicalWidget;
+      constructor(props: IKitTabsProps);
+      prepare(): this;
+      render(): this;
+      parse(): this;
+      switch(key?: number): this;
+      next(loop?: boolean): this;
+      previous(loop?: boolean): this;
+  }
+
+}
 declare module 'sensen-katon/foundation' {
   import { KatonBuilder } from "sensen-katon/builder";
   import { KatonEmitter, KatonEmitterCallback } from "sensen-katon/emitter";
   import KatonProps from "sensen-katon/props";
-  import type { IWidgetNode, IWidgetChildren, IKatonContext, IWidgetProps, IPhysicalWidget, IAbstractWidget, IKatonProps, IKatonReference, IStyleDeclaration, IAttributionProps, IActionProps, IState, IWidgetUsable, IWidgetListenerMap, IWidgetListenerCallback } from "sensen-katon/declarations";
+  import type { IWidgetNode, IWidgetChildren, IKatonContext, IWidgetProps, IPhysicalWidget, IAbstractWidget, IKatonProps, IKatonReference, IStyleDeclaration, IAttributionProps, IActionProps, IState, IWidgetUsable, IWidgetListenerMap, IWidgetListenerCallback, IPhysicalOffset } from "sensen-katon/declarations";
   export default class WidgetNode<Props extends IKatonProps> implements IWidgetNode {
       codex: string | null;
       children?: any;
@@ -645,10 +758,13 @@ declare module 'sensen-katon/foundation' {
       $element(): this;
       prepare(): this;
       connect(): this;
-      listen(eventname: keyof IWidgetListenerMap, callback: IWidgetListenerCallback): this;
+      on(eventname: keyof IWidgetListenerMap, callback: IWidgetListenerCallback): this;
       disconnect(): this;
       clean(): this;
       style(declarations: IStyleDeclaration): this;
+      removeStyle(declarations: Array<keyof IStyleDeclaration>): this;
+      measure(): DOMRect | undefined;
+      offset(property?: keyof IPhysicalOffset): number | IPhysicalOffset | undefined;
       addClass(tokens: string): this;
       toggleClass(tokens: string, force?: boolean | undefined): boolean | (boolean | undefined)[] | undefined;
       containsClass(tokens: string): boolean | (boolean | undefined)[] | undefined;
@@ -695,9 +811,37 @@ declare module 'sensen-katon/foundation' {
   }
 
 }
+declare module 'sensen-katon/gestures' {
+  import { IKatonGesture, IKatonGestureCallback, IKatonGestureSwipeConfig, IPhysicalWidget, IWidgetListenerCallback, IWidgetListenerConfig } from "sensen-katon/declarations";
+  import { KatonEmitter } from "sensen-katon/emitter";
+  export function DetectGestures<T extends IPhysicalWidget>(widget: T, names: string, callback: IWidgetListenerCallback): T;
+  export function DetectStaticGestures<T extends IPhysicalWidget>(widget: T, names: string, callback: IWidgetListenerCallback, config?: IWidgetListenerConfig): T;
+  export class SwipeGesture<T extends IPhysicalWidget> implements IKatonGesture<T> {
+      #private;
+      widget: T;
+      config: IKatonGestureSwipeConfig;
+      emitter: KatonEmitter;
+      constructor(widget: T, config?: IKatonGestureSwipeConfig);
+      start(callback: IKatonGestureCallback<T>): this;
+      move(callback: IKatonGestureCallback<T>): this;
+      end(callback: IKatonGestureCallback<T>): this;
+      observe(): this;
+  }
+  export default class KatonGesture {
+      static Swipe: typeof SwipeGesture;
+  }
+
+}
 declare module 'sensen-katon/index' {
   export default class Katon {
   }
+
+}
+declare module 'sensen-katon/kits' {
+  import { IKitScrollingProps, IKitTabsProps } from "sensen-katon/declarations";
+  import { ScrollingWidget, TabsWidget } from "sensen-katon/foundation-kits";
+  export function Tabs(props: IKitTabsProps): TabsWidget;
+  export function Scrolling(props: IKitScrollingProps): ScrollingWidget;
 
 }
 declare module 'sensen-katon/props' {

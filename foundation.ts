@@ -21,6 +21,8 @@ import type {
   IWidgetUsable,
   IWidgetListenerMap,
   IWidgetListenerCallback,
+  IPhysicalOffsetMap,
+  IPhysicalOffset,
 } from "./declarations";
 import MetricRandom from "sensen-metric-random/index";
 
@@ -155,7 +157,7 @@ export class PhysicalWidget extends WidgetNode<IKatonProps> implements IPhysical
     
   }
 
-  listen( eventname : keyof IWidgetListenerMap, callback : IWidgetListenerCallback ){
+  on( eventname : keyof IWidgetListenerMap, callback : IWidgetListenerCallback ){
 
     this.element?.addEventListener( eventname, ( event ) => {
     
@@ -223,6 +225,71 @@ export class PhysicalWidget extends WidgetNode<IKatonProps> implements IPhysical
     return this;
       
   }
+
+
+  removeStyle( declarations : Array<keyof IStyleDeclaration> ){
+
+    declarations.map( name => {
+
+      if( this.element instanceof HTMLElement ){
+
+        this.element.style.removeProperty( name as string )
+
+      }
+
+    })
+    
+    this.emitter.dispatch('removeStyle', { widget : this, declarations })
+    
+    return this;
+      
+  }
+
+
+
+  measure(){
+
+    return this.element?.getBoundingClientRect()
+    
+  }
+  
+  offset( property ?: keyof IPhysicalOffset ) : number | IPhysicalOffset | undefined {
+
+    const keys : IPhysicalOffsetMap = {
+
+      'height' : 'offsetHeight',
+
+      'width' : 'offsetWidth',
+
+      'top' : 'offsetTop',
+
+      'left' : 'offsetLeft',
+
+      'parent' : 'offsetParent',
+      
+    }
+    
+    return ( this.element && property && keys[ property ] )
+
+    //@ts-ignore
+    ? this.element[ keys[ property ] ] as (undefined | number)
+
+    : {
+
+      width: this.element?.offsetWidth,
+
+      height: this.element?.offsetHeight,
+
+      top: this.element?.offsetTop,
+
+      left: this.element?.offsetHeight,
+
+      parent: this.element?.offsetParent,
+      
+    } as IPhysicalOffset
+    
+  }
+  
 
   
 

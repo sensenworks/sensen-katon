@@ -1,4 +1,4 @@
-import { KatonEmitter, KatonEmitterCallback } from "./emitter";
+import { IKatonEmitter, KatonEmitter, KatonEmitterCallback } from "./emitter";
 
 
 
@@ -56,6 +56,12 @@ export interface IPhysicalWidget extends IWidgetNode{
   clean() : this;
 
   style( declarations : IStyleDeclaration ) : this;
+  
+  removeStyle( declarations : Array<keyof IStyleDeclaration> ) : this;
+
+  offset( property ?: keyof IPhysicalOffset ) : number | IPhysicalOffset | undefined;
+
+  measure() : DOMRect | undefined;
 
   addClass( tokens : string ) : this;
 
@@ -81,8 +87,40 @@ export interface IPhysicalWidget extends IWidgetNode{
 
   pushToRender( ...children : IWidgetChildren[] ) : this;
 
+  append( ...nodes: (string | Node | IPhysicalWidget )[] ) : this;
+
+  on( eventname : keyof IWidgetListenerMap, callback : IWidgetListenerCallback ) : this;
+  
 }
 
+
+export type IPhysicalOffsetMap = {
+
+  'height' : 'offsetHeight',
+
+  'width' : 'offsetWidth',
+
+  'top' : 'offsetTop',
+
+  'left' : 'offsetLeft',
+
+  'parent' : 'offsetParent',
+  
+}
+
+export type IPhysicalOffset = {
+
+  'height' : number | undefined,
+
+  'width' : number | undefined,
+
+  'top' : number | undefined,
+
+  'left' : number | undefined,
+
+  'parent' : number | undefined,
+  
+}
 
 export interface IHeadlingWidget extends IPhysicalWidget{
 
@@ -138,9 +176,15 @@ export interface IKatonBuilder<C extends IWidgetNode> {
 }
 
 
+export type IWidgetListenerConfig = {
+
+  loop ?: boolean;
+  
+}
+
 export type IWidgetListenerMap = GlobalEventHandlersEventMap
 
-export type IWidgetListenerCallback = ( listenerContext : WidgetListenerContext ) => void
+export type IWidgetListenerCallback = ( listenerContext : IWidgetListenerContext ) => void
 
 export type IWidgetListenerCallbacks = {
 
@@ -148,7 +192,7 @@ export type IWidgetListenerCallbacks = {
   
 }
 
-export type WidgetListenerContext = {
+export type IWidgetListenerContext = {
 
   event : Event;
 
@@ -694,3 +738,125 @@ export interface ITableSectionWidget extends ITableFragmentWidget{
 
 }
 
+
+
+
+
+
+export interface IKitTabProps extends IKatonProps {
+
+  default ?: boolean;
+
+  label : string | IPhysicalWidget;
+
+  icon ?: string;
+
+  about ?: string | IPhysicalWidget;
+  
+  children : IPhysicalWidget;
+  
+}
+
+export type IKitTabsProps = Array<IKitTabProps>
+
+export type IKitTabsSwitchEmitter = {
+
+  index : number;
+
+  helmet : IPhysicalWidget;
+
+  frame : IPhysicalWidget;
+  
+}
+
+
+
+
+export type IKitScrollingControllerCallbackProps = {
+
+  indicator ?: IPhysicalWidget;
+  
+  container ?: IPhysicalWidget;
+
+  area : IKitScrollingArea;
+  
+}
+
+export interface IKitScrollingProps extends IKatonProps {
+
+  direction ?: IWidgetKitDirection;
+
+  controller ?: {
+
+    indicator ?: IPhysicalWidget;
+
+    infinite ?: boolean;
+
+    refreshing : ( widgets : IKitScrollingControllerCallbackProps ) => Promise<boolean>;
+    
+  };
+
+  children : Array<IPhysicalWidget>
+  
+}
+
+export type IWidgetKitDirection  = 'vertical' | 'horizontal'
+
+export type IKitScrollingArea  = 'end' | 'start'
+
+export type IKitScrollingAreaEmitter  = {
+
+  area : IKitScrollingArea;
+
+  level : number;
+  
+}
+
+
+
+
+export type IKatonGestureDelta = {
+
+  x : number;
+
+  y : number;
+  
+}
+
+export type IKatonGestureSwipeConfig = IWidgetListenerConfig & {
+
+  // direction ?: IWidgetKitDirection
+  
+}
+
+export type IKatonGesturePayload<T extends IPhysicalWidget> = {
+
+  gesture : IKatonGesture<T>; 
+  
+  context : IWidgetListenerContext;
+
+  measue: DOMRect | undefined;
+
+  delta: IKatonGestureDelta;
+  
+}
+
+export type IKatonGestureCallback<T extends IPhysicalWidget> = ( payload : IKatonGesturePayload<T> ) => void;
+
+export interface IKatonGesture<T extends IPhysicalWidget> {
+
+  widget : T;
+
+  emitter : IKatonEmitter;
+  
+}
+
+export interface IKatonGestureInspector {
+
+  start: boolean;
+
+  move: boolean;
+
+  stopImmediat: boolean;
+
+}

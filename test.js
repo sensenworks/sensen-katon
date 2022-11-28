@@ -1,15 +1,64 @@
 import Builder, { Append } from "./builder";
-import { Widget, H1, Paragraph, Textual, Context, H2, Ref, Style, Action, UseKit, State, Row, Button, Column, Input, DropdownList, Form, Attribution, UseAction, Table, Picture } from "./widgets";
+import { Widget, H1, Paragraph, Textual, Context, H2, Style, Action, UseKit, State, Row, Button, Column, Input, DropdownList, Form, Attribution, Table, Picture, Center } from "./widgets";
 import Ui from "./ui";
+import { Scrolling, Tabs } from "./kits";
 const paragraph = () => {
-    let ref = null;
-    return Builder(Widget(Ref(r => ref = r), Context((context) => context?.addSlot('Hello', 'Boy')), Paragraph(`
-        Lorem ipsum dolor sit, amet consectetur adipisicing elit. 
-        Repellat cum iusto officiis quod maxime, aspernatur ratione, 
-        quia architecto, eius qui labore illo inventore qcodexem nobis? 
-        Autem, commodi corporis! At, magni!
-      `), Context((context) => {
-        console.warn('Paragraph Context :', context?.slot('Hello'), ref?.measure());
+    return Builder(Widget(Context((context) => context?.addSlot('Hello', 'Boy')), Scrolling({
+        direction: 'vertical',
+        controller: {
+            infinite: true,
+            indicator: Widget(Center(Textual('Actualisation...')).style({
+                padding: '2rem 0'
+            })),
+            refreshing: async (widgets) => new Promise((done) => {
+                console.log('Refresh pending', widgets);
+                setTimeout(() => {
+                    done(true);
+                    console.log('Refresh done');
+                }, 3000);
+            }),
+        },
+        children: [
+            Paragraph(`
+            Lorem ipsum dolor sit, amet consectetur adipisicing elit. 
+            Repellat cum iusto officiis quod maxime, aspernatur ratione, 
+            quia architecto, eius qui labore illo inventore qcodexem nobis? 
+            Autem, commodi corporis! At, magni!
+          `),
+            Paragraph(`
+            Lorem ipsum dolor sit, amet consectetur adipisicing elit. 
+            Repellat cum iusto officiis quod maxime, aspernatur ratione, 
+            quia architecto, eius qui labore illo inventore qcodexem nobis? 
+            Autem, commodi corporis! At, magni!
+          `),
+            Paragraph(`
+            Lorem ipsum dolor sit, amet consectetur adipisicing elit. 
+            Repellat cum iusto officiis quod maxime, aspernatur ratione, 
+            quia architecto, eius qui labore illo inventore qcodexem nobis? 
+            Autem, commodi corporis! At, magni!
+          `),
+            Paragraph(`
+            Lorem ipsum dolor sit, amet consectetur adipisicing elit. 
+            Repellat cum iusto officiis quod maxime, aspernatur ratione, 
+            quia architecto, eius qui labore illo inventore qcodexem nobis? 
+            Autem, commodi corporis! At, magni!
+          `),
+            Paragraph(`
+            Lorem ipsum dolor sit, amet consectetur adipisicing elit. 
+            Repellat cum iusto officiis quod maxime, aspernatur ratione, 
+            quia architecto, eius qui labore illo inventore qcodexem nobis? 
+            Autem, commodi corporis! At, magni!
+          `),
+            Paragraph(`
+            Lorem ipsum dolor sit, amet consectetur adipisicing elit. 
+            Repellat cum iusto officiis quod maxime, aspernatur ratione, 
+            quia architecto, eius qui labore illo inventore qcodexem nobis? 
+            Autem, commodi corporis! At, magni!
+          `),
+        ]
+    }).style({
+        height: '320px'
+    }), Context(() => {
     })));
 };
 const mystate = State({
@@ -19,14 +68,52 @@ const mystate = State({
     checker: false
 });
 const main = () => {
-    return Builder(Widget(UseAction('click', ({ builder }) => {
-        console.log('Submit form', builder?.widget);
-    }), mystate.use(), Style({
+    const tabs = Tabs([
+        {
+            label: 'Tab #1',
+            default: true,
+            children: Widget('Content tab #1')
+                .on('click', () => {
+                tabs.next();
+            })
+        },
+        {
+            label: 'Tab #2',
+            children: Widget('Content tab #2')
+                .on('click', () => {
+                tabs.next();
+            })
+        },
+        {
+            label: 'Tab #3',
+            children: Widget('Content tab #3')
+                .on('click', () => {
+                tabs.next();
+            })
+        },
+        {
+            label: 'Tab #4',
+            children: Widget('Content tab #4')
+                .on('click', () => {
+                tabs.next();
+            })
+        },
+        {
+            label: 'Tab #5',
+            children: Widget('Content tab #5')
+                .on('click', () => {
+                tabs.next();
+            })
+        },
+    ]);
+    return Builder(Widget(mystate.use(), Style({
         backgroundColor: '#cacaca',
         padding: '2rem',
         borderRadius: '2rem',
     }), Context((context) => {
         console.log('The Context', context?.addSlot('Hello', 'World'));
+    }), tabs.whenemit('switch', ({ emit }) => {
+        console.warn('Switch Tab', emit);
     }), H1('Sensen Katon', Style({
         fontSize: '15vmin'
     })), H2('Framework', UseKit({
@@ -68,7 +155,7 @@ const main = () => {
         },
         { label: 'choix 3', value: '3' },
         { label: 'choix 4', value: '4' },
-    ]).listen('change', (context) => {
+    ]).on('change', (context) => {
         console.log('Choise changed', context);
     })), Button(Textual('Fake Button')).style({
         color: '#999',
@@ -81,11 +168,11 @@ const main = () => {
     }))).attribution({
         ':submit': 'message'
     }), Picture({
-        source: './donut.png',
+        source: 'http://picsum.photos/225/225',
         media: [
             {
                 query: 'min-width:960px',
-                source: './donut-2.png',
+                source: 'http://picsum.photos/800/300',
             }
         ],
         failed: Textual('Image Failed'),

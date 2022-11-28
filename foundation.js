@@ -72,7 +72,7 @@ export class PhysicalWidget extends WidgetNode {
         }
         return this;
     }
-    listen(eventname, callback) {
+    on(eventname, callback) {
         this.element?.addEventListener(eventname, (event) => {
             callback({
                 widget: this,
@@ -106,6 +106,36 @@ export class PhysicalWidget extends WidgetNode {
         });
         this.emitter.dispatch('style', { widget: this, declarations });
         return this;
+    }
+    removeStyle(declarations) {
+        declarations.map(name => {
+            if (this.element instanceof HTMLElement) {
+                this.element.style.removeProperty(name);
+            }
+        });
+        this.emitter.dispatch('removeStyle', { widget: this, declarations });
+        return this;
+    }
+    measure() {
+        return this.element?.getBoundingClientRect();
+    }
+    offset(property) {
+        const keys = {
+            'height': 'offsetHeight',
+            'width': 'offsetWidth',
+            'top': 'offsetTop',
+            'left': 'offsetLeft',
+            'parent': 'offsetParent',
+        };
+        return (this.element && property && keys[property])
+            ? this.element[keys[property]]
+            : {
+                width: this.element?.offsetWidth,
+                height: this.element?.offsetHeight,
+                top: this.element?.offsetTop,
+                left: this.element?.offsetHeight,
+                parent: this.element?.offsetParent,
+            };
     }
     addClass(tokens) {
         tokens.split(' ').map(name => this.element?.classList.add(name));

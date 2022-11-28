@@ -41,7 +41,6 @@ export default class Ui{
   
 }
 
-
 export function UiMutation( 
   
   widget : IPhysicalWidget | null, 

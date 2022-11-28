@@ -6,7 +6,7 @@ import {
   Textual, 
   Context, 
   H2, 
-  Ref, 
+  // Ref, 
   Style,
   Action,
   UseKit,
@@ -18,46 +18,130 @@ import {
   DropdownList,
   Form,
   Attribution,
-  UseAction,
   Table,
-  Picture
+  Picture,
+  Center
 } from "./widgets"
 import Ui from "./ui"
 import { 
   IWidgetNode, 
-  IKatonReference,
+  // IKatonReference,
+  IKitTabsSwitchEmitter,
 } from "./declarations"
 import { PhysicalWidget } from "./foundation"
+import { Scrolling, Tabs } from "./kits"
 
 
 
 
 const paragraph = ()=> {
 
-  let ref : IKatonReference | null = null;
+  // let ref : IKatonReference | null = null;
 
   return Builder(
 
     Widget(
   
-      Ref( r => ref = r ),
+      // Ref( r => ref = r ),
   
       Context(( context )=> context?.addSlot('Hello', 'Boy') ),
-  
-      Paragraph(`
-        Lorem ipsum dolor sit, amet consectetur adipisicing elit. 
-        Repellat cum iusto officiis quod maxime, aspernatur ratione, 
-        quia architecto, eius qui labore illo inventore qcodexem nobis? 
-        Autem, commodi corporis! At, magni!
-      `),
-  
-      Context(( context )=>{
+      
 
-        console.warn(
-          'Paragraph Context :', 
-          context?.slot('Hello'), 
-          ref?.measure(), 
-        )
+      
+      Scrolling({
+
+        direction : 'vertical',
+
+        controller:{
+
+          infinite: true,
+
+          indicator: Widget(
+
+            Center( Textual('Actualisation...') ).style({
+              padding:'2rem 0'
+            })
+
+          ),
+
+          refreshing : async( widgets ) => new Promise<boolean>(( done )=>{
+
+            console.log('Refresh pending', widgets )
+
+            setTimeout(()=>{
+
+              done( true )
+
+              console.log('Refresh done')
+
+            }, 3000)
+            
+          }),
+
+        },
+
+        children: [
+
+          Paragraph(`
+            Lorem ipsum dolor sit, amet consectetur adipisicing elit. 
+            Repellat cum iusto officiis quod maxime, aspernatur ratione, 
+            quia architecto, eius qui labore illo inventore qcodexem nobis? 
+            Autem, commodi corporis! At, magni!
+          `),
+    
+
+          Paragraph(`
+            Lorem ipsum dolor sit, amet consectetur adipisicing elit. 
+            Repellat cum iusto officiis quod maxime, aspernatur ratione, 
+            quia architecto, eius qui labore illo inventore qcodexem nobis? 
+            Autem, commodi corporis! At, magni!
+          `),
+    
+
+          Paragraph(`
+            Lorem ipsum dolor sit, amet consectetur adipisicing elit. 
+            Repellat cum iusto officiis quod maxime, aspernatur ratione, 
+            quia architecto, eius qui labore illo inventore qcodexem nobis? 
+            Autem, commodi corporis! At, magni!
+          `),
+    
+
+          Paragraph(`
+            Lorem ipsum dolor sit, amet consectetur adipisicing elit. 
+            Repellat cum iusto officiis quod maxime, aspernatur ratione, 
+            quia architecto, eius qui labore illo inventore qcodexem nobis? 
+            Autem, commodi corporis! At, magni!
+          `),
+    
+
+          Paragraph(`
+            Lorem ipsum dolor sit, amet consectetur adipisicing elit. 
+            Repellat cum iusto officiis quod maxime, aspernatur ratione, 
+            quia architecto, eius qui labore illo inventore qcodexem nobis? 
+            Autem, commodi corporis! At, magni!
+          `),
+    
+
+          Paragraph(`
+            Lorem ipsum dolor sit, amet consectetur adipisicing elit. 
+            Repellat cum iusto officiis quod maxime, aspernatur ratione, 
+            quia architecto, eius qui labore illo inventore qcodexem nobis? 
+            Autem, commodi corporis! At, magni!
+          `),
+    
+        ]
+
+      }).style({
+        height: '320px'
+      }),
+  
+      Context(( )=>{
+
+        // console.warn(
+        //   'Paragraph Context :', 
+        //   context?.slot('Hello'), 
+        //   ref?.measure(), 
+        // )
 
       }),
   
@@ -91,15 +175,60 @@ const mystate = State<MainState>({
 
 const main = ()=>{
 
+
+  const tabs = Tabs([
+
+        {
+          label:'Tab #1',
+          default: true,
+          children: Widget('Content tab #1')
+            .on('click', ()=>{
+              tabs.next() 
+            })
+        },
+        
+        {
+          label:'Tab #2',
+          children: Widget('Content tab #2')
+            .on('click', ()=>{
+              tabs.next() 
+            })
+        },
+        
+        {
+          label:'Tab #3',
+          children: Widget('Content tab #3')
+            .on('click', ()=>{
+              tabs.next() 
+            })
+        },
+        
+        {
+          label:'Tab #4',
+          children: Widget('Content tab #4')
+            .on('click', ()=>{
+              tabs.next()
+            })
+        },
+        
+        {
+          label:'Tab #5',
+          children: Widget('Content tab #5')
+            .on('click', ()=>{
+              tabs.next(  ) 
+            })
+        },
+        
+      ])
   
   return Builder<IWidgetNode>(
 
     Widget(
 
-      UseAction('click', ({ builder })=>{
-        // event?.preventDefault()
-        console.log('Submit form', builder?.widget )
-      }),
+      // UseAction('click', ({ builder })=>{
+      //   // event?.preventDefault()
+      //   console.log('Submit form', builder?.widget )
+      // }),
 
       mystate.use(),
 
@@ -114,6 +243,12 @@ const main = ()=>{
         console.log('The Context', context?.addSlot('Hello', 'World') )
       }),
 
+
+      tabs.whenemit<IKitTabsSwitchEmitter>('switch', ({ emit })=>{
+        console.warn('Switch Tab', emit )
+      }),
+
+      
       H1('Sensen Katon', Style({
         fontSize:'15vmin'
       })),
@@ -194,7 +329,7 @@ const main = ()=>{
               },
               { label:'choix 3', value:'3' },
               { label:'choix 4', value:'4' },
-            ]).listen('change', (context) =>{
+            ]).on('change', (context) =>{
               console.log('Choise changed', context )
             })
           ),
@@ -218,11 +353,11 @@ const main = ()=>{
       }),
        
       Picture({
-        source: './donut.png',
+        source: 'http://picsum.photos/225/225',
         media:[
           {
             query: 'min-width:960px',
-            source: './donut-2.png',
+            source: 'http://picsum.photos/800/300',
           }
         ],
         failed: Textual('Image Failed'),
