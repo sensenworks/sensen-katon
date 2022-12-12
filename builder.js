@@ -46,6 +46,14 @@ export class KatonBuilder {
         this.emitter.dispatch('ready', this.widget);
         return this;
     }
+    fragment(widget, container) {
+        if (widget instanceof PhysicalWidget) {
+            widget.builder = this;
+        }
+        widget.render();
+        FragmentedBuilder(this, widget, container || undefined);
+        return this;
+    }
 }
 export function FragmentedBuilder(builder, widget, parent) {
     if (widget instanceof KatonContext) {
@@ -60,6 +68,7 @@ export function FragmentedBuilder(builder, widget, parent) {
         widget.emitter.dispatch('builder:used', widget);
     }
     else if (widget instanceof WidgetNode) {
+        widget.builder = builder;
         widget.ancestor = builder.widget;
         widget.parent = parent || widget;
         widget.context = !widget.context ? builder.context : widget.context;
@@ -90,6 +99,7 @@ export function FragmentedBuilder(builder, widget, parent) {
 }
 export function PhysicalWidgetBuilder(builder, widget, parent) {
     if (widget instanceof WidgetNode) {
+        widget.builder = builder;
         if (widget instanceof PhysicalWidget) {
             if (Array.isArray(widget.children)) {
                 widget.children.forEach(child => {

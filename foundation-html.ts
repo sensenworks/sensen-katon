@@ -805,6 +805,8 @@ export class TableWidget extends PhysicalWidget implements IPhysicalWidget{
     this.foot = ( new TableFootWidget([]) ).prepare();
     
 
+    // FragmentedBuilder( this.builder, this.head )
+
     this.pushToRender( 
 
       this.head, 
@@ -839,7 +841,7 @@ export class TableWidget extends PhysicalWidget implements IPhysicalWidget{
     
     columns?.map( column => {
 
-      const line : IWidgetChildren[] = []
+      const row = (new TableRowWidget([])).prepare()
 
       column.map( data => {
 
@@ -850,23 +852,28 @@ export class TableWidget extends PhysicalWidget implements IPhysicalWidget{
         if( data.rowspan ){ a['colspan'] = `${ data.rowspan }` }
         
         a.table = { column: `${ data.type || 'text' }` }
-        
-        line.push(
+
+        this.builder?.fragment(
 
           ( new TableCellWidget([
 
             (new TextualWidget([ data.label ])).prepare()
+    
+          ])).prepare().attribution( a ),
 
-          ])).prepare().attribution( a )
-          
+          row
+
         )
-
+        
       })
 
-      const r = (new TableRowWidget(line)).prepare()
       
-      this.head?.content( r );
+      if( this.builder ){
 
+        FragmentedBuilder( this.builder, row, this.head || undefined )
+
+      }
+      
     })
     
 
@@ -882,7 +889,7 @@ export class TableWidget extends PhysicalWidget implements IPhysicalWidget{
     
     rows?.map( row => {
 
-      const line : IWidgetChildren[] = []
+      const line = (new TableRowWidget([])).prepare()
 
       row.map( data => {
 
@@ -893,23 +900,28 @@ export class TableWidget extends PhysicalWidget implements IPhysicalWidget{
         if( data.rowspan ){ a['colspan'] = `${ data.rowspan }` }
         
         a.table = { cell: `body` }
-        
-        line.push(
+
+        this.builder?.fragment(
 
           ( new TableCellWidget([
 
             (new TextualWidget([ this.parseCellValue(data.value) ])).prepare()
 
-          ])).prepare().attribution( a )
-          
-        )
+          ])).prepare().attribution( a ),
 
+          line
+
+        )
+        
       })
 
-      const r = (new TableRowWidget(line)).prepare()
       
-      this.body?.content( r );
+      if( this.builder ){
 
+        FragmentedBuilder( this.builder, line, this.body || undefined )
+
+      }
+      
     })
     
     return this;
@@ -924,7 +936,7 @@ export class TableWidget extends PhysicalWidget implements IPhysicalWidget{
     
     footers?.map( footer => {
 
-      const line : IWidgetChildren[] = []
+      const line = (new TableRowWidget([])).prepare()
 
       footer.map( data => {
 
@@ -936,22 +948,28 @@ export class TableWidget extends PhysicalWidget implements IPhysicalWidget{
         
         a.table = { cell: `foot` }
         
-        line.push(
+        this.builder?.fragment(
 
           ( new TableCellWidget([
 
             (new TextualWidget([ this.parseCellValue(data.value) ])).prepare()
 
-          ])).prepare().attribution( a )
-          
+          ])).prepare().attribution( a ),
+
+          line
+
         )
+
 
       })
 
-      const r = (new TableRowWidget(line)).prepare()
-      
-      this.foot?.content( r );
+      if( this.builder ){
 
+        FragmentedBuilder( this.builder, line, this.foot || undefined )
+
+      }
+      
+      
     })
     
     return this;

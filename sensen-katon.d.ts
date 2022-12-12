@@ -36,6 +36,7 @@ declare module 'sensen-katon/builder' {
       prepare(): this;
       injector(widget: IWidgetNode, parent?: IWidgetNode): this;
       render(): this;
+      fragment(widget: IWidgetUsable, container?: IWidgetNode): this;
   }
   export function FragmentedBuilder(builder: KatonBuilder<IWidgetNode>, widget: IWidgetUsable, parent?: IWidgetNode): KatonContext | KatonBuilder<any> | WidgetNode<any> | AbstractWidget;
   export function PhysicalWidgetBuilder(builder: KatonBuilder<IWidgetNode>, widget: IWidgetUsable, parent?: IWidgetNode): IWidgetUsable;
@@ -133,6 +134,7 @@ declare module 'sensen-katon/declarations' {
       prepare(): this;
       injector(widget: C): this;
       render(): this;
+      fragment(widget: IPhysicalWidget, parent?: IPhysicalWidget): this;
   }
   export type IWidgetListenerConfig = {
       loop?: boolean;

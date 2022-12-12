@@ -432,7 +432,7 @@ export class TableWidget extends PhysicalWidget {
     parseColumns() {
         const columns = this.props?.get('column');
         columns?.map(column => {
-            const line = [];
+            const row = (new TableRowWidget([])).prepare();
             column.map(data => {
                 const a = {};
                 if (data.colspan) {
@@ -442,19 +442,20 @@ export class TableWidget extends PhysicalWidget {
                     a['colspan'] = `${data.rowspan}`;
                 }
                 a.table = { column: `${data.type || 'text'}` };
-                line.push((new TableCellWidget([
+                this.builder?.fragment((new TableCellWidget([
                     (new TextualWidget([data.label])).prepare()
-                ])).prepare().attribution(a));
+                ])).prepare().attribution(a), row);
             });
-            const r = (new TableRowWidget(line)).prepare();
-            this.head?.content(r);
+            if (this.builder) {
+                FragmentedBuilder(this.builder, row, this.head || undefined);
+            }
         });
         return this;
     }
     parseRows() {
         const rows = this.props?.get('rows');
         rows?.map(row => {
-            const line = [];
+            const line = (new TableRowWidget([])).prepare();
             row.map(data => {
                 const a = {};
                 if (data.colspan) {
@@ -464,19 +465,20 @@ export class TableWidget extends PhysicalWidget {
                     a['colspan'] = `${data.rowspan}`;
                 }
                 a.table = { cell: `body` };
-                line.push((new TableCellWidget([
+                this.builder?.fragment((new TableCellWidget([
                     (new TextualWidget([this.parseCellValue(data.value)])).prepare()
-                ])).prepare().attribution(a));
+                ])).prepare().attribution(a), line);
             });
-            const r = (new TableRowWidget(line)).prepare();
-            this.body?.content(r);
+            if (this.builder) {
+                FragmentedBuilder(this.builder, line, this.body || undefined);
+            }
         });
         return this;
     }
     parseFoot() {
         const footers = this.props?.get('footer');
         footers?.map(footer => {
-            const line = [];
+            const line = (new TableRowWidget([])).prepare();
             footer.map(data => {
                 const a = {};
                 if (data.colspan) {
@@ -486,12 +488,13 @@ export class TableWidget extends PhysicalWidget {
                     a['colspan'] = `${data.rowspan}`;
                 }
                 a.table = { cell: `foot` };
-                line.push((new TableCellWidget([
+                this.builder?.fragment((new TableCellWidget([
                     (new TextualWidget([this.parseCellValue(data.value)])).prepare()
-                ])).prepare().attribution(a));
+                ])).prepare().attribution(a), line);
             });
-            const r = (new TableRowWidget(line)).prepare();
-            this.foot?.content(r);
+            if (this.builder) {
+                FragmentedBuilder(this.builder, line, this.foot || undefined);
+            }
         });
         return this;
     }

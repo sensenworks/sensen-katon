@@ -92,7 +92,7 @@ export class PhysicalWidget extends WidgetNode {
     }
     clean() {
         if (this.element) {
-            Object.values(this.element.children).map(child => child.remove());
+            Object.values(this.element.childNodes).map(child => child.remove());
             this.emitter.dispatch('clean', this);
         }
         return this;

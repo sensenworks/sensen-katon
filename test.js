@@ -2,6 +2,49 @@ import Builder, { Append } from "./builder";
 import { Widget, H1, Paragraph, Textual, Context, H2, Style, Action, UseKit, State, Row, Button, Column, Input, DropdownList, Form, Attribution, Table, Picture, Center } from "./widgets";
 import Ui from "./ui";
 import { Scrolling, Tabs } from "./kits";
+const table = Widget().html('Loading Table...');
+setTimeout(() => {
+    const tb = Table({
+        column: [
+            [
+                {
+                    name: 'status',
+                    label: '#',
+                    type: 'boolean'
+                },
+                {
+                    name: 'firstname',
+                    label: 'Nom',
+                    type: 'text'
+                },
+                {
+                    name: 'lastname',
+                    label: 'Prénom',
+                    type: 'text'
+                },
+            ]
+        ],
+        rows: [
+            [
+                { value: true, colspan: 1 },
+                { value: 'Cater', colspan: 1 },
+                { value: 'Ian', colspan: 1 },
+            ],
+            [
+                { value: 'Gobou Y. Yannick', colspan: 3 },
+            ],
+        ],
+        footer: [
+            [
+                { value: 'Save', colspan: 2 },
+                { value: 'Edit', colspan: 1 },
+            ],
+        ]
+    });
+    if (table.builder) {
+        table.builder.fragment(tb, table.clean());
+    }
+}, 1000);
 const paragraph = () => {
     return Builder(Widget(Context((context) => context?.addSlot('Hello', 'Boy')), Scrolling({
         direction: 'vertical',
@@ -112,7 +155,7 @@ const main = () => {
         borderRadius: '2rem',
     }), Context((context) => {
         console.log('The Context', context?.addSlot('Hello', 'World'));
-    }), tabs.whenemit('switch', ({ emit }) => {
+    }), table, tabs.whenemit('switch', ({ emit }) => {
         console.warn('Switch Tab', emit);
     }), H1('Sensen Katon', Style({
         fontSize: '15vmin'
@@ -177,42 +220,6 @@ const main = () => {
         ],
         failed: Textual('Image Failed'),
         pending: Textual('Pending...'),
-    }), Table({
-        column: [
-            [
-                {
-                    name: 'status',
-                    label: '#',
-                    type: 'boolean'
-                },
-                {
-                    name: 'firstname',
-                    label: 'Nom',
-                    type: 'text'
-                },
-                {
-                    name: 'lastname',
-                    label: 'Prénom',
-                    type: 'text'
-                },
-            ]
-        ],
-        rows: [
-            [
-                { value: true, colspan: 1 },
-                { value: 'Cater', colspan: 1 },
-                { value: 'Ian', colspan: 1 },
-            ],
-            [
-                { value: 'Gobou Y. Yannick', colspan: 3 },
-            ],
-        ],
-        footer: [
-            [
-                { value: 'Save', colspan: 2 },
-                { value: 'Edit', colspan: 1 },
-            ],
-        ]
     }), Context((context) => {
         console.warn('Main Context', context?.slot('Hello'));
     }), triggerAction));

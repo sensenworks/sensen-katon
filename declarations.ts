@@ -173,6 +173,8 @@ export interface IKatonBuilder<C extends IWidgetNode> {
 
   render() : this;
 
+  fragment( widget : IPhysicalWidget, parent?: IPhysicalWidget ) : this;
+
 }
 
 

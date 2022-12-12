@@ -14,7 +14,6 @@ import type {
 } from "./declarations";
 
 import Ui from "./ui";
-// import KatonState from "./state";
 
 
 export class KatonBuilder<T extends IWidgetNode> implements IKatonBuilder<T>{
@@ -111,6 +110,24 @@ export class KatonBuilder<T extends IWidgetNode> implements IKatonBuilder<T>{
     
   }
 
+
+  fragment( widget : IWidgetUsable, container?: IWidgetNode ){
+
+    if( widget instanceof PhysicalWidget ){
+
+      widget.builder = this;
+
+    }
+
+    widget.render();
+
+    FragmentedBuilder( this, widget as IWidgetUsable, container || undefined )
+
+    return this;
+    
+  }
+
+
   
 }
 
@@ -125,7 +142,7 @@ export function FragmentedBuilder(
   parent ?: IWidgetNode,
 
 ){
-
+  
 
   /**
    * Context
@@ -162,7 +179,7 @@ export function FragmentedBuilder(
    */
   else if( widget instanceof WidgetNode ){
 
-    // widget.builder = builder;
+    widget.builder = builder;
   
     widget.ancestor = builder.widget;
 
@@ -234,9 +251,13 @@ export function PhysicalWidgetBuilder(
 
 ){
 
+
+
   if( widget instanceof WidgetNode ){
       
-    // widget.builder = builder
+    widget.builder = builder
+    
+    // widget.render()
 
     /**
      * Physical

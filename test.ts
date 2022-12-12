@@ -33,6 +33,69 @@ import { Scrolling, Tabs } from "./kits"
 
 
 
+const table = Widget().html('Loading Table...')
+
+
+setTimeout(()=>{
+
+  const tb = Table({
+  
+    column:[
+      [
+        {
+          name:'status',
+          label:'#',
+          type:'boolean'
+        },
+        {
+          name:'firstname',
+          label:'Nom',
+          type:'text'
+        },
+        {
+          name:'lastname',
+          label:'Prénom',
+          type:'text'
+        },
+      ]
+    ],
+  
+    rows:[
+  
+      [
+        { value: true, colspan: 1},
+        { value:'Cater', colspan: 1},
+        { value:'Ian', colspan: 1},
+      ],
+  
+      [
+        { value:'Gobou Y. Yannick', colspan: 3},
+      ],
+      
+    ],
+    
+    footer:[
+  
+      [
+        { value:'Save', colspan: 2},
+        { value:'Edit', colspan: 1},
+      ],
+  
+      
+    ]
+    
+  });
+
+
+  if( table.builder ){
+
+    table.builder.fragment( tb, table.clean() )
+
+  }
+  
+}, 1000)
+
+
 
 const paragraph = ()=> {
 
@@ -244,6 +307,11 @@ const main = ()=>{
       }),
 
 
+
+
+      table,
+      
+
       tabs.whenemit<IKitTabsSwitchEmitter>('switch', ({ emit })=>{
         console.warn('Switch Tab', emit )
       }),
@@ -365,53 +433,6 @@ const main = ()=>{
         // pending:'Image en cours de chargement...',
       }),
 
-      Table({
-        
-        column:[
-          [
-            {
-              name:'status',
-              label:'#',
-              type:'boolean'
-            },
-            {
-              name:'firstname',
-              label:'Nom',
-              type:'text'
-            },
-            {
-              name:'lastname',
-              label:'Prénom',
-              type:'text'
-            },
-          ]
-        ],
-
-        rows:[
-
-          [
-            { value: true, colspan: 1},
-            { value:'Cater', colspan: 1},
-            { value:'Ian', colspan: 1},
-          ],
-
-          [
-            { value:'Gobou Y. Yannick', colspan: 3},
-          ],
-          
-        ],
-        
-        footer:[
-
-          [
-            { value:'Save', colspan: 2},
-            { value:'Edit', colspan: 1},
-          ],
-
-          
-        ]
-        
-      }),
       
       
       Context(( context )=>{
