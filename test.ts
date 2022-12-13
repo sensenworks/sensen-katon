@@ -65,7 +65,7 @@ setTimeout(()=>{
       [
         { value: true, colspan: 1},
         { value:'Cater', colspan: 1},
-        { value:'Ian', colspan: 1},
+        { value: (props) => { console.log('Table Cell Props', props ); return `Func Cell` }, colspan: 1},
       ],
   
       [

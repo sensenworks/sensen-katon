@@ -22,7 +22,8 @@ import type {
   ITableRows,
   IAttributionProps,
   ITableColumns,
-  IPictureProps
+  IPictureProps,
+  ITableCellCallableProps,
 } from "./declarations";
 import { defineElement } from "./elements";
 import { 
@@ -804,9 +805,6 @@ export class TableWidget extends PhysicalWidget implements IPhysicalWidget{
 
     this.foot = ( new TableFootWidget([]) ).prepare();
     
-
-    // FragmentedBuilder( this.builder, this.head )
-
     this.pushToRender( 
 
       this.head, 
@@ -901,21 +899,14 @@ export class TableWidget extends PhysicalWidget implements IPhysicalWidget{
         
         a.table = { cell: `body` }
 
-        this.builder?.fragment(
-
-          ( new TableCellWidget([
-
-            (new TextualWidget([ this.parseCellValue(data.value) ])).prepare()
-
-          ])).prepare().attribution( a ),
-
-          line
-
-        )
+        const cellule = ( new TableCellWidget([])).prepare().attribution( a );
+        
+        const content = (new TextualWidget([ this.parseCellValue<ITableRows>( data.value, row, line, cellule ) ])).prepare()
+        
+        this.builder?.fragment( cellule.pushToRender( content ), line )
         
       })
 
-      
       if( this.builder ){
 
         FragmentedBuilder( this.builder, line, this.body || undefined )
@@ -934,11 +925,11 @@ export class TableWidget extends PhysicalWidget implements IPhysicalWidget{
 
     const footers = this.props?.get<ITableRows[]>('footer')
     
-    footers?.map( footer => {
+    footers?.map( row => {
 
       const line = (new TableRowWidget([])).prepare()
 
-      footer.map( data => {
+      row.map( data => {
 
         const a : IAttributionProps = {}
 
@@ -947,18 +938,12 @@ export class TableWidget extends PhysicalWidget implements IPhysicalWidget{
         if( data.rowspan ){ a['colspan'] = `${ data.rowspan }` }
         
         a.table = { cell: `foot` }
+
+        const cellule = ( new TableCellWidget([])).prepare().attribution( a );
         
-        this.builder?.fragment(
-
-          ( new TableCellWidget([
-
-            (new TextualWidget([ this.parseCellValue(data.value) ])).prepare()
-
-          ])).prepare().attribution( a ),
-
-          line
-
-        )
+        const content = (new TextualWidget([ this.parseCellValue<ITableRows>( data.value, row, line, cellule ) ])).prepare()
+        
+        this.builder?.fragment( cellule.pushToRender( content ), line )
 
 
       })
@@ -978,15 +963,35 @@ export class TableWidget extends PhysicalWidget implements IPhysicalWidget{
   
 
 
-  parseCellValue( data : any ){
+  parseCellValue<T>( 
+    
+    value : any, 
+    
+    entry : T, 
+    
+    row ?: TableRowWidget, 
+    
+    cellule ?: TableCellWidget 
+    
+  ) : IWidgetChildren {
 
-    if( data instanceof PhysicalWidget ){
+    if( value instanceof PhysicalWidget ){ return value; }
 
-      return data;
+    else if( typeof value == 'function' ){
+
+      const props : ITableCellCallableProps<T> = { entry, row, cellule }
+      
+      return this.parseCellValue( value( props ), entry, row, cellule )
       
     }
 
-    return `${ data }`
+    else if( typeof value == 'object' ){
+
+      return Array.isArray( value ) ? `${ value.join(',') }` : `${ JSON.stringify( value ) }`
+      
+    }
+
+    return `${ value }`
     
   }
   

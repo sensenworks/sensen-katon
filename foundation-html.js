@@ -465,9 +465,9 @@ export class TableWidget extends PhysicalWidget {
                     a['colspan'] = `${data.rowspan}`;
                 }
                 a.table = { cell: `body` };
-                this.builder?.fragment((new TableCellWidget([
-                    (new TextualWidget([this.parseCellValue(data.value)])).prepare()
-                ])).prepare().attribution(a), line);
+                const cellule = (new TableCellWidget([])).prepare().attribution(a);
+                const content = (new TextualWidget([this.parseCellValue(data.value, row, line, cellule)])).prepare();
+                this.builder?.fragment(cellule.pushToRender(content), line);
             });
             if (this.builder) {
                 FragmentedBuilder(this.builder, line, this.body || undefined);
@@ -477,9 +477,9 @@ export class TableWidget extends PhysicalWidget {
     }
     parseFoot() {
         const footers = this.props?.get('footer');
-        footers?.map(footer => {
+        footers?.map(row => {
             const line = (new TableRowWidget([])).prepare();
-            footer.map(data => {
+            row.map(data => {
                 const a = {};
                 if (data.colspan) {
                     a['colspan'] = `${data.colspan}`;
@@ -488,9 +488,9 @@ export class TableWidget extends PhysicalWidget {
                     a['colspan'] = `${data.rowspan}`;
                 }
                 a.table = { cell: `foot` };
-                this.builder?.fragment((new TableCellWidget([
-                    (new TextualWidget([this.parseCellValue(data.value)])).prepare()
-                ])).prepare().attribution(a), line);
+                const cellule = (new TableCellWidget([])).prepare().attribution(a);
+                const content = (new TextualWidget([this.parseCellValue(data.value, row, line, cellule)])).prepare();
+                this.builder?.fragment(cellule.pushToRender(content), line);
             });
             if (this.builder) {
                 FragmentedBuilder(this.builder, line, this.foot || undefined);
@@ -498,11 +498,18 @@ export class TableWidget extends PhysicalWidget {
         });
         return this;
     }
-    parseCellValue(data) {
-        if (data instanceof PhysicalWidget) {
-            return data;
+    parseCellValue(value, entry, row, cellule) {
+        if (value instanceof PhysicalWidget) {
+            return value;
         }
-        return `${data}`;
+        else if (typeof value == 'function') {
+            const props = { entry, row, cellule };
+            return this.parseCellValue(value(props), entry, row, cellule);
+        }
+        else if (typeof value == 'object') {
+            return Array.isArray(value) ? `${value.join(',')}` : `${JSON.stringify(value)}`;
+        }
+        return `${value}`;
     }
 }
 export class PictureWidget extends PhysicalWidget {

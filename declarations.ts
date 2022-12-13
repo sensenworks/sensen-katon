@@ -686,9 +686,33 @@ export type ITableColumn = {
 
 export type ITableColumns = Array<ITableColumn>
 
+
+export type ITableCellCallableProps<T> = { 
+  
+  entry : T;
+  
+  row ?: ITableRowWidget;
+
+  cellule ?: ITableCellWidget
+
+}
+
+export type ITableCellCallable<T> = ( props : ITableCellCallableProps<T> ) => IWidgetChildren
+
+export type ITableRowObject = {
+
+  [ K : string | number ] : any
+  
+}
+
+
+export type ITableRowValues = string | number | boolean | ITableRowObject | Array<string> | IPhysicalWidget;
+
+export type ITableRowAvailableValue<T> = ITableRowValues | ITableCellCallable<T>
+
 export type ITableRow = {
 
-  value: any;
+  value: ITableRowValues | ITableCellCallable<any>;
   
   colspan?: number;
   

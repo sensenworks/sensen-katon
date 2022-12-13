@@ -341,8 +341,19 @@ declare module 'sensen-katon/declarations' {
       rowspan?: number;
   };
   export type ITableColumns = Array<ITableColumn>;
+  export type ITableCellCallableProps<T> = {
+      entry: T;
+      row?: ITableRowWidget;
+      cellule?: ITableCellWidget;
+  };
+  export type ITableCellCallable<T> = (props: ITableCellCallableProps<T>) => IWidgetChildren;
+  export type ITableRowObject = {
+      [K: string | number]: any;
+  };
+  export type ITableRowValues = string | number | boolean | ITableRowObject | Array<string> | IPhysicalWidget;
+  export type ITableRowAvailableValue<T> = ITableRowValues | ITableCellCallable<T>;
   export type ITableRow = {
-      value: any;
+      value: ITableRowValues | ITableCellCallable<any>;
       colspan?: number;
       rowspan?: number;
   };
@@ -672,7 +683,7 @@ declare module 'sensen-katon/foundation-html' {
       parseColumns(): this;
       parseRows(): this;
       parseFoot(): this;
-      parseCellValue(data: any): string | PhysicalWidget;
+      parseCellValue<T>(value: any, entry: T, row?: TableRowWidget, cellule?: TableCellWidget): IWidgetChildren;
   }
   export class PictureWidget extends PhysicalWidget implements IPhysicalWidget {
       #private;
